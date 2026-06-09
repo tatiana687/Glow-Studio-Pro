@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRISP-DM - Metodología para Minería de Datos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #f3e7ff 0%, #e0c3fc 30%, #c8a4f0 60%, #b388eb 100%);
+            min-height: 100vh;
+            color: #4a1c6b;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 50px 30px;
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 15px 50px rgba(138, 43, 226, 0.2);
+            margin-bottom: 35px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            animation: shimmer 8s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+        }
+
+        .header h1 {
+            font-family: 'Pacifico', cursive;
+            font-size: 3.2em;
+            color: #7b2cbf;
+            text-shadow: 3px 3px 0px rgba(255, 182, 255, 0.5);
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            color: #9d4edd;
+            font-weight: 500;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        .header .sparkles {
+            font-size: 1.3em;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 40px rgba(138, 43, 226, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(138, 43, 226, 0.25);
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(200, 164, 240, 0.4) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+        }
+
+        .card h2 {
+            color: #7b2cbf;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+        }
+
+        .card p, .card li {
+            color: #5a1e7a;
+            font-size: 1.05em;
+        }
+
+        .card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .card li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .card li::before {
+            content: '◆';
+            position: absolute;
+            left: 0;
+            color: #c77dff;
+        }
+
+        .phase-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .phase-item {
+            background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(240, 230, 255, 0.8) 100%);
+            border-radius: 20px;
+            padding: 20px 25px;
+            border-left: 5px solid #c77dff;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .phase-item:hover {
+            border-left-width: 8px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(240, 230, 255, 0.95) 100%);
+        }
+
+        .phase-item .phase-num {
+            display: inline-block;
+            background: linear-gradient(135deg, #c77dff, #9d4edd);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-weight: 700;
+            font-size: 0.9em;
+            margin-right: 12px;
+            box-shadow: 0 3px 10px rgba(157, 78, 221, 0.3);
+        }
+
+        .phase-item strong {
+            color: #7b2cbf;
+            font-size: 1.1em;
+        }
+
+        .phase-item .desc {
+            display: block;
+            margin-top: 8px;
+            padding-left: 44px;
+            color: #5a1e7a;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, rgba(255, 200, 255, 0.3), rgba(200, 164, 240, 0.3));
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 2px dashed #c77dff;
+        }
+
+        .example-box h3 {
+            color: #7b2cbf;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .example-step {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 15px;
+            padding: 12px 18px;
+            margin: 8px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .example-step .num {
+            background: linear-gradient(135deg, #c77dff, #9d4edd);
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 26px;
+            font-weight: 700;
+            font-size: 0.8em;
+            flex-shrink: 0;
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .pros, .cons {
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        .pros {
+            background: linear-gradient(135deg, rgba(200, 255, 200, 0.4), rgba(180, 240, 180, 0.3));
+            border: 2px solid rgba(100, 200, 100, 0.3);
+        }
+
+        .cons {
+            background: linear-gradient(135deg, rgba(255, 200, 200, 0.4), rgba(240, 180, 180, 0.3));
+            border: 2px solid rgba(200, 100, 100, 0.3);
+        }
+
+        .pros h3 {
+            color: #2a7a2a;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .cons h3 {
+            color: #7a2a2a;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .quote-box {
+            text-align: center;
+            padding: 40px 30px;
+            background: linear-gradient(135deg, rgba(157, 78, 221, 0.15), rgba(199, 125, 255, 0.2));
+            border-radius: 25px;
+            border: 2px solid rgba(157, 78, 221, 0.3);
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .quote-box::before {
+            content: '"';
+            font-family: 'Pacifico', cursive;
+            font-size: 4em;
+            color: rgba(157, 78, 221, 0.3);
+            position: absolute;
+            top: -10px;
+            left: 20px;
+        }
+
+        .quote-box p {
+            font-style: italic;
+            font-size: 1.15em;
+            color: #5a1e7a;
+            position: relative;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            margin-top: 30px;
+        }
+
+        .footer p {
+            color: #7b2cbf;
+            font-weight: 500;
+        }
+
+        .divider {
+            text-align: center;
+            font-size: 1.3em;
+            color: #c77dff;
+            margin: 20px 0;
+            letter-spacing: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+
+        th {
+            background: linear-gradient(135deg, #c77dff, #9d4edd);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            border-radius: 10px 10px 0 0;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(200, 164, 240, 0.4);
+            color: #5a1e7a;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .header h1 { font-size: 2.2em; }
+            .pros-cons { grid-template-columns: 1fr; }
+            .card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="sparkles">◆ ◇ ◆</div>
+            <h1>CRISP-DM</h1>
+            <p class="subtitle">Cross-Industry Standard Process for Data Mining</p>
+            <div class="sparkles">◆ ◇ ◆</div>
+        </div>
+
+        <div class="card">
+            <h2>¿Qué es CRISP-DM?</h2>
+            <p>CRISP-DM es la metodología estándar más utilizada en proyectos de minería de datos, ciencia de datos y análisis predictivo. Fue desarrollada en 1996 por un consorcio formado por empresas como SPSS, NCR, Daimler-Benz y el instituto OHRA, con el objetivo de estandarizar el proceso de desarrollo de proyectos de minería de datos de forma independiente del sector industrial o del software utilizado.</p>
+            <p style="margin-top: 15px;">Se caracteriza por ser un modelo <strong>cíclico y flexible</strong> que reconoce la naturaleza iterativa de los proyectos de datos. No es un proceso lineal, sino un ciclo continuo en el que los analistas pueden retroceder, ajustar y mejorar sus hallazgos a lo largo de todo el proyecto.</p>
+        </div>
+
+        <div class="divider">◇ ◆ ◇</div>
+
+        <div class="card">
+            <h2>Las 6 Fases de CRISP-DM</h2>
+            <div class="phase-grid">
+                <div class="phase-item">
+                    <span class="phase-num">1</span>
+                    <strong>Comprensión del Negocio</strong>
+                    <span class="desc">Comprender qué problema de negocio se intenta resolver y cómo el análisis de datos puede aportar valor. Se definen los objetivos estratégicos, se evalúan los recursos disponibles y se planifica el proyecto.</span>
+                </div>
+                <div class="phase-item">
+                    <span class="phase-num">2</span>
+                    <strong>Comprensión de los Datos</strong>
+                    <span class="desc">Familiarizarse con los datos disponibles. Se recolectan fuentes internas y externas, se realiza un análisis exploratorio (EDA) y se verifica la calidad de los datos, detectando valores faltantes, duplicados e inconsistencias.</span>
+                </div>
+                <div class="phase-item">
+                    <span class="phase-num">3</span>
+                    <strong>Preparación de los Datos</strong>
+                    <span class="desc">Transformar los datos crudos en un conjunto limpio y estructurado. Incluye selección, limpieza, construcción de nuevas variables (feature engineering), integración y formateo. Consume aproximadamente el 60-80% del tiempo del proyecto.</span>
+                </div>
+                <div class="phase-item">
+                    <span class="phase-num">4</span>
+                    <strong>Modelado</strong>
+                    <span class="desc">Aplicar técnicas estadísticas y algoritmos de aprendizaje automático sobre los datos preparados. Se seleccionan técnicas adecuadas según el objetivo (clasificación, regresión, clustering), se entrenan modelos y se evalúa su rendimiento con métricas específicas.</span>
+                </div>
+                <div class="phase-item">
+                    <span class="phase-num">5</span>
+                    <strong>Evaluación</strong>
+                    <span class="desc">Determinar si el modelo cumple con los objetivos de negocio definidos inicialmente. Se comparan los resultados con los criterios de éxito, se revisan posibles sesgos y se decide si el modelo está listo para producción.</span>
+                </div>
+                <div class="phase-item">
+                    <span class="phase-num">6</span>
+                    <strong>Despliegue</strong>
+                    <span class="desc">Integrar el modelo en los procesos operativos de la organización. Se planifica la implementación, se establece un sistema de monitoreo, se generan informes finales y se realiza una revisión del proyecto.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider">◇ ◆ ◇</div>
+
+        <div class="card">
+            <div class="example-box">
+                <h3>Caso de Estudio: Scoring Crediticio en un Banco</h3>
+                <div class="example-step">
+                    <span class="num">1</span>
+                    <p><strong>Negocio:</strong> Reducir la tasa de impago en préstamos personales en un 15%. Objetivo técnico: modelo predictivo con precisión mínima del 85%.</p>
+                </div>
+                <div class="example-step">
+                    <span class="num">2</span>
+                    <p><strong>Datos:</strong> Tablas de clientes, historial crediticio, transacciones y datos demográficos. Se detecta que el 12% de los registros de ingresos están vacíos y existen inconsistencias en fechas.</p>
+                </div>
+                <div class="example-step">
+                    <span class="num">3</span>
+                    <p><strong>Preparación:</strong> Imputación de ingresos faltantes con la mediana por grupo de edad, creación de variable "ratio deuda-ingreso", eliminación de registros irreparables y normalización de variables numéricas.</p>
+                </div>
+                <div class="example-step">
+                    <span class="num">4</span>
+                    <p><strong>Modelado:</strong> Entrenamiento de tres modelos (Regresión Logística, Random Forest, XGBoost) con validación cruzada de 5 pliegues. XGBoost obtiene el mejor resultado con 91% AUC-ROC.</p>
+                </div>
+                <div class="example-step">
+                    <span class="num">5</span>
+                    <p><strong>Evaluación:</strong> El modelo alcanza 93% AUC-ROC en pruebas, superando el objetivo. Se detecta un posible sesgo de género que debe mitigarse antes del despliegue.</p>
+                </div>
+                <div class="example-step">
+                    <span class="num">6</span>
+                    <p><strong>Despliegue:</strong> Integración mediante API en la plataforma de solicitudes en línea. Dashboard de monitoreo semanal y revisión planificada cada seis meses.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Ventajas de CRISP-DM</h2>
+            <ul>
+                <li>Aplicable a <strong>cualquier sector</strong>: finanzas, salud, retail, telecomunicaciones, manufactura, etc.</li>
+                <li><strong>Independiente del software</strong>: puede utilizarse con Python, R, SAS, SPSS, SQL u otras herramientas.</li>
+                <li><strong>Enfoque en el negocio</strong>: asegura que los proyectos estén alineados con objetivos estratégicos.</li>
+                <li><strong>Proceso iterativo</strong>: permite retroceder y ajustar en cualquier fase según los hallazgos.</li>
+                <li>Facilita la <strong>comunicación</strong> entre equipos técnicos y equipos de negocio.</li>
+                <li>Genera <strong>documentación estructurada</strong> que facilita la reproducibilidad y auditoría.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Limitaciones</h2>
+            <div class="pros-cons">
+                <div class="cons">
+                    <h3>Desventajas</h3>
+                    <ul>
+                        <li style="padding-left: 0;">No cubre aspectos modernos de MLOps (pipelines, CI/CD, gestión de versiones).</li>
+                        <li style="padding-left: 0;">Puede resultar demasiado genérico para proyectos altamente especializados.</li>
+                        <li style="padding-left: 0;">No contempla de forma nativa tecnologías como NLP o visión por computadora.</li>
+                        <li style="padding-left: 0;">Carece de prácticas formales de gestión del cambio organizacional.</li>
+                    </ul>
+                </div>
+                <div class="pros">
+                    <h3>Fortalezas</h3>
+                    <ul>
+                        <li style="padding-left: 0;">Metodología universal e independiente de la industria.</li>
+                        <li style="padding-left: 0;">Independiente del software o plataforma utilizada.</li>
+                        <li style="padding-left: 0;">Orientación a resultados de negocio medibles.</li>
+                        <li style="padding-left: 0;">Flexibilidad para adaptarse a proyectos de cualquier escala.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Comparación con Otras Metodologías</h2>
+            <table>
+                <tr>
+                    <th>Metodología</th>
+                    <th>Características</th>
+                    <th>Relación con CRISP-DM</th>
+                </tr>
+                <tr>
+                    <td><strong>KDD</strong></td>
+                    <td>Proceso académico formal con énfasis en descubrimiento de conocimiento.</td>
+                    <td>Precursor de CRISP-DM; más teórico y menos orientado a la industria.</td>
+                </tr>
+                <tr>
+                    <td><strong>TDSP</strong></td>
+                    <td>Desarrollado por Microsoft; integra herramientas de Azure y enfatiza la colaboración.</td>
+                    <td>Más orientado a la infraestructura en la nube.</td>
+                </tr>
+                <tr>
+                    <td><strong>OSEMN</strong></td>
+                    <td>Framework simple y memorable, popular en la comunidad de Python.</td>
+                    <td>Más simplificado, ideal para proyectos rápidos.</td>
+                </tr>
+                <tr>
+                    <td><strong>Agile DS</strong></td>
+                    <td>Combina principios ágiles (sprints, iteraciones) con ciencia de datos.</td>
+                    <td>Complementa CRISP-DM con metodologías de gestión de proyectos.</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Casos de Uso por Sector</h2>
+            <ul>
+                <li><strong>Banca y finanzas:</strong> Detección de fraudes, scoring crediticio, segmentación de clientes, predicción de churn.</li>
+                <li><strong>Salud:</strong> Diagnóstico asistido por IA, predicción de readmisiones, descubrimiento de fármacos.</li>
+                <li><strong>Retail:</strong> Sistemas de recomendación, optimización de precios, pronóstico de demanda.</li>
+                <li><strong>Telecomunicaciones:</strong> Prevención de fuga de clientes, optimización de redes.</li>
+                <li><strong>Manufactura:</strong> Mantenimiento predictivo, control de calidad, optimización de la cadena de suministro.</li>
+            </ul>
+        </div>
+
+        <div class="quote-box">
+            <p>"CRISP-DM representa el equilibrio entre rigor técnico y enfoque estratégico en proyectos de ciencia de datos."</p>
+        </div>
+
+        <div class="card">
+            <h2>Conclusión</h2>
+            <p>CRISP-DM sigue siendo, más de dos décadas después de su creación, la metodología de referencia para proyectos de minería de datos y ciencia de datos. Su fortaleza radica en su <strong>equilibrio entre rigor técnico y enfoque en el negocio</strong>, su <strong>flexibilidad iterativa</strong> y su <strong>universalidad</strong> independiente de herramientas o industrias.</p>
+            <p style="margin-top: 12px;">Para estudiantes y profesionales que se inician en el mundo de la ciencia de datos, dominar CRISP-DM es una competencia fundamental para estructurar proyectos de manera profesional, comunicar resultados de forma efectiva y garantizar que los modelos de datos generen un impacto real y medible en las organizaciones.</p>
+            <p style="margin-top: 12px;">Aunque el panorama tecnológico ha evolucionado enormemente, los principios fundamentales de CRISP-DM —comprender el problema, explorar los datos, construir modelos sólidos y desplegar soluciones sostenibles— permanecen vigentes en la era de la inteligencia artificial y el Big Data.</p>
+        </div>
+
+        <div class="card">
+            <h2>Referencias</h2>
+            <ul>
+                <li>Wirth, R., & Hipp, J. (2000). CRISP-DM: Towards a Standard Process Model for Data Mining. <em>Proceedings of the 4th International Conference on the Practical Applications of Knowledge Discovery and Data Mining</em>.</li>
+                <li>Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C., & Wirth, R. (2000). <em>CRISP-DM 1.0 Step-by-step Data Mining Guide</em>. SPSS Inc.</li>
+                <li>Larose, D. T., & Larose, C. D. (2015). <em>Data Mining and Predictive Analytics</em> (2nd ed.). Wiley.</li>
+                <li>Provost, F., & Fawcett, T. (2013). <em>Data Science for Business: What You Need to Know About Data Mining and Data-Analytic Thinking</em>. O'Reilly Media.</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>Documento elaborado con fines académicos</p>
+            <p style="margin-top: 8px; font-size: 0.9em; color: #9d4edd;">◆ ◇ ◆</p>
+        </div>
+    </div>
+</body>
+</html>
